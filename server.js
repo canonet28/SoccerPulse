@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const { PersistenceStore } = require('./lib/persistence-store');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +62,7 @@ function dbInit() {
   }
 }
 dbInit();
+const persistenceStore = new PersistenceStore();
 
 function saveArchiveSnapshot(matchId, name, payloadObj) {
   const created = Date.now();
@@ -129,17 +131,32 @@ const { SoccerEngine, ROOM_GLOBAL, ROOM_HOME, ROOM_AWAY, STATUS: SOCCER_STATUS, 
 // Initialize Soccer Engine
 const soccerEngine = new SoccerEngine(
   () => EMOTIONS,
-  saveArchiveSnapshot,
-  getArchiveSnapshot,
-  deleteArchiveSnapshot
+  (matchId, name, payloadObj) => {
+    // Keep local fallback write path.
+    saveArchiveSnapshot(matchId, name, payloadObj);
+    // Also persist to Postgres when configured.
+    persistenceStore.saveArchiveSnapshot(matchId, name, payloadObj).catch((err) => {
+      console.error('[PersistenceStore] saveArchiveSnapshot failed:', err.message);
+    });
+  },
+  async (matchId) => {
+    const fromDb = await persistenceStore.getArchiveSnapshot(matchId);
+    if (fromDb) return fromDb;
+    return getArchiveSnapshot(matchId);
+  },
+  (matchId) => {
+    deleteArchiveSnapshot(matchId);
+    persistenceStore.deleteArchiveSnapshot(matchId).catch((err) => {
+      console.error('[PersistenceStore] deleteArchiveSnapshot failed:', err.message);
+    });
+  },
+  async () => {
+    const fromDb = await persistenceStore.listArchiveSnapshots();
+    if (fromDb.length > 0) return fromDb;
+    return listArchiveSnapshots();
+  },
+  async (matchId) => persistenceStore.listTapEvents(matchId)
 );
-
-// Start ticker if API token is configured
-if (process.env.SPORTMONKS_API_TOKEN) {
-  soccerEngine.startTicker();
-} else {
-  console.log('[SoccerPulse] SPORTMONKS_API_TOKEN not set. Use dev endpoints to create mock matches.');
-}
 
 // =============================================================================
 // API ENDPOINTS
@@ -222,6 +239,17 @@ app.post('/api/matches/:matchId/tap', (req, res) => {
 
   // Record tap with period info
   const result = soccerEngine.recordTap(matchId, validRoomKey, tapPeriod, tapSliceIndex, emotion);
+  persistenceStore
+    .recordTapEvent({
+      matchId,
+      roomKey: validRoomKey,
+      period: tapPeriod,
+      sliceIndex: tapSliceIndex,
+      emotion,
+    })
+    .catch((err) => {
+      console.error('[PersistenceStore] recordTapEvent failed:', err.message);
+    });
 
   // Debug log
   if (process.env.DEBUG_SPORTMONKS) {
@@ -490,6 +518,21 @@ app.get('/api/config/emotions', (req, res) => {
 // START SERVER
 // =============================================================================
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`SoccerPulse running on http://localhost:${PORT}/`);
+async function bootstrap() {
+  await persistenceStore.init();
+  await soccerEngine.restoreArchivedMatches();
+
+  if (process.env.SPORTMONKS_API_TOKEN) {
+    soccerEngine.startTicker();
+  } else {
+    console.log('[SoccerPulse] SPORTMONKS_API_TOKEN not set. Use dev endpoints to create mock matches.');
+  }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`SoccerPulse running on http://localhost:${PORT}/`);
+  });
+}
+
+bootstrap().catch((err) => {
+  console.error('[SoccerPulse] bootstrap failed:', err);
 });
