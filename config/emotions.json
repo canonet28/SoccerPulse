@@ -1,0 +1,19 @@
+[
+  { "key": "excited", "emoji": "🥳", "label": "Excited" },
+  { "key": "happy", "emoji": "😃", "label": "Happy" },
+  { "key": "thrilled", "emoji": "🤩", "label": "Thrilled" },
+  { "key": "smug", "emoji": "😎", "label": "Smug" },
+  { "key": "salute", "emoji": "🫡", "label": "Appreciative" },
+  { "key": "tense", "emoji": "😬", "label": "Tense" },
+  { "key": "bored", "emoji": "😴", "label": "Bored" },
+  { "key": "confused", "emoji": "🤔", "label": "Confused" },
+  { "key": "amused", "emoji": "😂", "label": "Amused" },
+  { "key": "meh", "emoji": "🫤", "label": "Meh" },
+  { "key": "mindblown", "emoji": "🤯", "label": "Mindblown" },
+  { "key": "facepalm", "emoji": "🤦🏽‍♂️", "label": "Perplexed" },
+  { "key": "disappointed", "emoji": "😔", "label": "Disappointed" },
+  { "key": "frustrated", "emoji": "😤", "label": "Frustrated" },
+  { "key": "angry", "emoji": "😠", "label": "Angry" },
+  { "key": "enraged", "emoji": "🤬", "label": "Enraged" }
+]
+

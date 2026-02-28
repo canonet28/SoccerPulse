@@ -1,0 +1,25 @@
+{
+  "name": "moodtracker",
+  "version": "1.0.0",
+  "description": "MoodCup – Ball-by-Ball Mood Tracker (T20)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "cricket",
+    "t20",
+    "mood",
+    "express",
+    "vanilla-js"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.2.4",
+    "express": "^4.18.2"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^9.4.0"
+  }
+}

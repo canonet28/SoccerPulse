@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>SoccerPulse</title>
+  <link rel="stylesheet" href="soccer.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+</head>
+<body>
+  <div id="app">
+    <!-- Home View: Match List -->
+    <section id="home-view" class="view">
+      <header class="top-bar">
+        <h1>⚽ SoccerPulse</h1>
+        <label class="dev-toggle" title="Developer Mode">
+          <input type="checkbox" id="dev-mode-toggle">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Dev</span>
+        </label>
+      </header>
+      <div class="content">
+        <div class="section-label">Live Matches</div>
+        <div id="live-matches" class="match-list"></div>
+        <div class="section-label">Upcoming</div>
+        <div id="upcoming-matches" class="match-list"></div>
+        <div class="section-label">Finished</div>
+        <div id="finished-matches" class="match-list"></div>
+        <p id="no-matches" class="empty-msg hidden">No matches available. Check back during live games or create a test match below.</p>
+
+        <!-- Dev controls (hidden in production) -->
+        <div id="dev-controls" class="dev-panel">
+          <div class="section-label">Dev Controls</div>
+          <div class="dev-row">
+            <input type="text" id="dev-match-id" placeholder="Match ID" value="test-1">
+            <input type="text" id="dev-home" placeholder="Home Team" value="Team A">
+            <input type="text" id="dev-away" placeholder="Away Team" value="Team B">
+            <button id="dev-create-btn" class="btn primary">Create Mock</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Match View: Live -->
+    <section id="match-view" class="view hidden">
+      <!-- Compact Header -->
+      <header class="live-header">
+        <button id="back-btn" class="back-btn" aria-label="Back">‹</button>
+        <div class="live-header-center">
+          <div class="live-teams">
+            <span id="home-name">Home</span>
+            <span class="score-divider">·</span>
+            <span id="away-name">Away</span>
+          </div>
+          <div class="live-meta">
+            <span id="clock-label" class="live-clock">0'</span>
+            <span id="match-status" class="live-status">LIVE</span>
+          </div>
+        </div>
+        <button id="export-timeline-btn" class="export-btn" aria-label="Export">↗</button>
+      </header>
+
+      <!-- Room selector (World Cup mode) -->
+      <div id="room-selector" class="room-selector hidden">
+        <button class="room-btn active" data-room="GLOBAL">Global</button>
+        <button class="room-btn" data-room="HOME" id="room-home-btn">Home</button>
+        <button class="room-btn" data-room="AWAY" id="room-away-btn">Away</button>
+      </div>
+
+      <!-- Timeline View Toggle -->
+      <div class="timeline-toggle">
+        <button id="tab-my-picks" class="toggle-btn active">My Picks</button>
+        <button id="tab-pulsemap" class="toggle-btn">Pulse</button>
+      </div>
+
+      <!-- Dynamic Timeline Container -->
+      <div id="timeline-container" class="timeline-container">
+        <div id="live-timeline" class="live-timeline"></div>
+      </div>
+
+      <!-- Emoji Pad (Always Visible) -->
+      <div id="emoji-pad" class="emoji-pad"></div>
+
+      <!-- Dev controls for match (hidden in production) -->
+      <div id="dev-match-controls" class="dev-panel">
+        <button id="dev-advance-1m" class="btn ghost sm">+1 min</button>
+        <button id="dev-advance-2m" class="btn ghost sm">+2 min</button>
+        <button id="dev-advance-10m" class="btn ghost sm">+10 min</button>
+        <button id="dev-halftime" class="btn ghost sm">HT</button>
+        <button id="dev-second-half" class="btn ghost sm">2H</button>
+        <button id="dev-et1" class="btn ghost sm">ET1</button>
+        <button id="dev-et2" class="btn ghost sm">ET2</button>
+        <button id="dev-pen" class="btn ghost sm">PEN</button>
+        <button id="dev-kick" class="btn ghost sm">+Kick</button>
+        <button id="dev-refresh" class="btn ghost sm">Refresh</button>
+        <button id="dev-end" class="btn ghost sm">End</button>
+      </div>
+    </section>
+
+    <!-- Replay View (Archived Match) -->
+    <section id="replay-view" class="view hidden">
+      <header class="match-header">
+        <button id="replay-back-btn" class="btn icon" aria-label="Back">←</button>
+        <div class="match-teams">
+          <span id="replay-home-name">Home</span>
+          <span class="vs">vs</span>
+          <span id="replay-away-name">Away</span>
+        </div>
+        <div class="status-chip ended">FT</div>
+      </header>
+
+      <!-- Room selector for replay -->
+      <div id="replay-room-selector" class="room-selector hidden">
+        <button class="room-btn active" data-room="GLOBAL">Global</button>
+        <button class="room-btn" data-room="HOME" id="replay-room-home-btn">Home Fans</button>
+        <button class="room-btn" data-room="AWAY" id="replay-room-away-btn">Away Fans</button>
+      </div>
+
+      <!-- Replay/PulseMap Tabs -->
+      <div class="timeline-tabs">
+        <button id="tab-replay-scrub" class="timeline-tab active">Replay</button>
+        <button id="tab-replay-pulsemap" class="timeline-tab">PulseMap</button>
+      </div>
+
+      <!-- Replay Panel (Scrubber) -->
+      <div id="panel-replay-scrub" class="timeline-panel">
+        <div class="scrubber-section">
+          <div class="scrubber-container">
+            <div id="replay-emoji-popup" class="replay-emoji-popup"></div>
+            <div class="scrubber-center-zone"></div>
+            <div id="replay-scrubber" class="replay-scrubber"></div>
+          </div>
+          <div id="replay-time-range" class="replay-time-range">
+            <span class="range">1'–2'</span>
+          </div>
+          <div id="replay-info" class="replay-info"></div>
+        </div>
+        <div id="replay-stats" class="replay-stats"></div>
+      </div>
+
+      <!-- PulseMap Panel -->
+      <div id="panel-replay-pulsemap" class="timeline-panel hidden">
+        <div class="timeline-actions">
+          <button id="export-replay-pulsemap" class="btn ghost sm">Export</button>
+        </div>
+        <div id="replay-pulsemap-timeline" class="replay-pulsemap-grid"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="soccer.js"></script>
+</body>
+</html>
