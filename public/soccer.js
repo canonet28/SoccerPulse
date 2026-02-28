@@ -308,7 +308,7 @@
         statusChip.textContent = 'FT';
         statusChip.classList.add('ended');
 
-        // Add delete button for finished matches (visible in dev mode)
+        // Add delete button for archived matches (admin endpoint enforces auth when enabled)
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '✕';
