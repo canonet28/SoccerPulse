@@ -120,6 +120,17 @@
     [PERIOD.PENALTIES]: { regularSlices: 0, baseMinute: 0 }
   };
 
+  const ADMIN_TOKEN_KEY = 'soccerpulse_admin_token';
+  function getAdminToken() {
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get('admin_token');
+    if (fromQuery) {
+      localStorage.setItem(ADMIN_TOKEN_KEY, fromQuery);
+      return fromQuery;
+    }
+    return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+  }
+
   // API
   const API = {
     matches: () => fetch('/api/matches').then(r => r.json()),
@@ -162,9 +173,15 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ matchId })
     }).then(r => r.json()),
-    deleteMatch: (matchId) => fetch(`/api/dev/match/${matchId}`, {
-      method: 'DELETE'
-    }).then(r => r.json())
+    deleteMatch: async (matchId) => {
+      const adminToken = getAdminToken();
+      const endpoint = `/api/admin/archive/${matchId}`;
+      const resp = await fetch(endpoint, {
+        method: 'DELETE',
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined
+      });
+      return resp.json();
+    }
   };
 
   // Dev mode persistence

@@ -112,6 +112,33 @@ function listArchiveSnapshots() {
   }
 }
 
+async function deleteArchivedMatchById(matchId) {
+  if (!matchId) {
+    return { ok: false, status: 400, error: 'matchId required' };
+  }
+
+  const state = soccerEngine.getMatchState(matchId);
+  if (!state) {
+    return { ok: false, status: 404, error: 'Match not found' };
+  }
+  if (!state.archived) {
+    return { ok: false, status: 400, error: 'Can only delete finished matches' };
+  }
+
+  const archiveId = `soccer-${matchId}`;
+  deleteArchiveSnapshot(archiveId);
+  try {
+    await persistenceStore.deleteArchiveSnapshot(archiveId);
+  } catch (err) {
+    console.error('[PersistenceStore] deleteArchiveSnapshot failed:', err.message);
+    return { ok: false, status: 500, error: 'Failed to delete archived match from persistence' };
+  }
+
+  soccerEngine.matches.delete(String(matchId));
+  soccerEngine.aggregates.delete(String(matchId));
+  return { ok: true, deleted: matchId };
+}
+
 // --- Admin auth middleware ---
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || null;
 
@@ -460,35 +487,26 @@ app.post('/api/dev/record-penalty', (req, res) => {
 });
 
 // DELETE /api/dev/match/:matchId - Delete a finished match
-app.delete('/api/dev/match/:matchId', (req, res) => {
+app.delete('/api/dev/match/:matchId', async (req, res) => {
   if (process.env.NODE_ENV === 'production') {
     return res.status(403).json({ ok: false, error: 'Not available in production' });
   }
   const { matchId } = req.params;
-  if (!matchId) {
-    return res.status(400).json({ ok: false, error: 'matchId required' });
+  const result = await deleteArchivedMatchById(matchId);
+  if (!result.ok) {
+    return res.status(result.status).json({ ok: false, error: result.error });
   }
+  res.json(result);
+});
 
-  // Check if match exists and is archived
-  const state = soccerEngine.getMatchState(matchId);
-  if (!state) {
-    return res.status(404).json({ ok: false, error: 'Match not found' });
+// DELETE /api/admin/archive/:matchId - Delete an archived match (production-safe with admin auth)
+app.delete('/api/admin/archive/:matchId', requireAdmin, async (req, res) => {
+  const { matchId } = req.params;
+  const result = await deleteArchivedMatchById(matchId);
+  if (!result.ok) {
+    return res.status(result.status).json({ ok: false, error: result.error });
   }
-  if (!state.archived) {
-    return res.status(400).json({ ok: false, error: 'Can only delete finished matches' });
-  }
-
-  // Delete from archive (archiveId is prefixed with 'soccer-')
-  const archiveId = `soccer-${matchId}`;
-  deleteArchiveSnapshot(archiveId);
-
-  // Remove from matches map
-  soccerEngine.matches.delete(String(matchId));
-
-  // Clear aggregates for this match
-  soccerEngine.aggregates.delete(String(matchId));
-
-  res.json({ ok: true, deleted: matchId });
+  res.json(result);
 });
 
 // =============================================================================
