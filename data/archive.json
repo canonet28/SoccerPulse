@@ -20886,5 +20886,25 @@
       }
     },
     "created_at": 1772281412304
+  },
+  "soccer-19441777": {
+    "name": "LNZ Cherkasy vs Polissya Zhytomyr",
+    "payload": {
+      "matchId": "19441777",
+      "homeTeam": {
+        "id": 257125,
+        "name": "LNZ Cherkasy"
+      },
+      "awayTeam": {
+        "id": 109277,
+        "name": "Polissya Zhytomyr"
+      },
+      "startTime": "2026-02-28T16:00:00.000Z",
+      "elapsedSeconds": 5580,
+      "hasExtraTime": false,
+      "hasPenalties": false,
+      "periods": {}
+    },
+    "created_at": 1772284892330
   }
 }
