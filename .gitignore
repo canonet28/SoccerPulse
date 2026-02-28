@@ -1,0 +1,38 @@
+# OS
+.DS_Store
+
+# Logs
+*.log
+stderr.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+SoccerPulseApp/.env
+
+# Dependencies
+node_modules/
+SoccerPulseApp/node_modules/
+
+# Expo / React Native
+SoccerPulseApp/.expo/
+SoccerPulseApp/dist/
+SoccerPulseApp/web-build/
+SoccerPulseApp/android/
+SoccerPulseApp/ios/build/
+SoccerPulseApp/ios/Pods/
+
+# Build / cache
+.tmp/
+tmp/
+.cache/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
