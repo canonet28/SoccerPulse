@@ -3,7 +3,7 @@
   { "key": "happy", "emoji": "😃", "label": "Happy", "active": true, "order": 2 },
   { "key": "thrilled", "emoji": "🤩", "label": "Thrilled", "active": true, "order": 3 },
   { "key": "smug", "emoji": "😎", "label": "Smug", "active": true, "order": 4 },
-  { "key": "salute", "emoji": "🫡", "label": "Appreciative", "active": true, "order": 5 },
+  { "key": "salute", "emoji": "🫡", "label": "Appreciative", "active": false, "order": 17 },
   { "key": "tense", "emoji": "😬", "label": "Tense", "active": true, "order": 6 },
   { "key": "bored", "emoji": "😴", "label": "Bored", "active": true, "order": 7 },
   { "key": "confused", "emoji": "🤔", "label": "Confused", "active": true, "order": 8 },
@@ -14,5 +14,6 @@
   { "key": "disappointed", "emoji": "😔", "label": "Disappointed", "active": true, "order": 13 },
   { "key": "frustrated", "emoji": "😤", "label": "Frustrated", "active": true, "order": 14 },
   { "key": "angry", "emoji": "😠", "label": "Angry", "active": true, "order": 15 },
-  { "key": "enraged", "emoji": "🤬", "label": "Enraged", "active": true, "order": 16 }
+  { "key": "enraged", "emoji": "🤬", "label": "Enraged", "active": true, "order": 16 },
+  { "key": "appreciate", "emoji": "🙏", "label": "Appreciative", "active": true, "order": 5 },
 ]
