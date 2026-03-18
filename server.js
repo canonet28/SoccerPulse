@@ -16,11 +16,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 // --- Emotions config ---
 function defaultEmotions() {
   return [
-    { key: 'excited', emoji: '🥳', label: 'Excited' },
-    { key: 'happy', emoji: '😃', label: 'Happy' },
-    { key: 'thrilled', emoji: '🤩', label: 'Thrilled' },
-    { key: 'frustrated', emoji: '😤', label: 'Frustrated' },
-    { key: 'angry', emoji: '😠', label: 'Angry' },
+    { key: 'excited', emoji: '🥳', label: 'Excited', active: true, order: 1 },
+    { key: 'happy', emoji: '😃', label: 'Happy', active: true, order: 2 },
+    { key: 'thrilled', emoji: '🤩', label: 'Thrilled', active: true, order: 3 },
+    { key: 'frustrated', emoji: '😤', label: 'Frustrated', active: true, order: 4 },
+    { key: 'angry', emoji: '😠', label: 'Angry', active: true, order: 5 },
   ];
 }
 
@@ -31,13 +31,25 @@ function loadEmotions() {
     const raw = fs.readFileSync(p, 'utf8');
     const arr = JSON.parse(raw);
     if (!Array.isArray(arr) || !arr.length) return defaultEmotions();
-    return arr.map(e => ({ key: String(e.key), emoji: String(e.emoji || ''), label: String(e.label || e.key) }));
+    return arr.map((e, idx) => ({
+      key: String(e.key),
+      emoji: String(e.emoji || ''),
+      label: String(e.label || e.key),
+      active: e.active !== false,
+      order: Number.isFinite(Number(e.order)) ? Number(e.order) : idx + 1,
+    }));
   } catch (_) {
     return defaultEmotions();
   }
 }
 
-const EMOTIONS = loadEmotions();
+const MAX_ACTIVE_EMOJIS = Math.max(1, parseInt(process.env.MAX_ACTIVE_EMOJIS || '16', 10) || 16);
+const EMOTION_CONFIG = loadEmotions().sort((a, b) => (a.order || 0) - (b.order || 0));
+const EMOTIONS_CATALOG = EMOTION_CONFIG.map(({ key, emoji, label }) => ({ key, emoji, label }));
+const ACTIVE_EMOTIONS = EMOTION_CONFIG
+  .filter((e) => e.active !== false)
+  .slice(0, MAX_ACTIVE_EMOJIS)
+  .map(({ key, emoji, label }) => ({ key, emoji, label }));
 
 // --- Persistence: SQLite (preferred) with JSON fallback ---
 let db = null;
@@ -157,7 +169,7 @@ const { SoccerEngine, ROOM_GLOBAL, ROOM_HOME, ROOM_AWAY, STATUS: SOCCER_STATUS, 
 
 // Initialize Soccer Engine
 const soccerEngine = new SoccerEngine(
-  () => EMOTIONS,
+  () => EMOTIONS_CATALOG,
   (matchId, name, payloadObj) => {
     // Keep local fallback write path.
     saveArchiveSnapshot(matchId, name, payloadObj);
@@ -192,7 +204,14 @@ const soccerEngine = new SoccerEngine(
 // GET /api/matches - List all matches
 app.get('/api/matches', (req, res) => {
   const matches = soccerEngine.listMatches();
-  res.json({ ok: true, matches, emotions: EMOTIONS });
+  res.json({
+    ok: true,
+    matches,
+    emotions: ACTIVE_EMOTIONS,
+    activeEmotions: ACTIVE_EMOTIONS,
+    emotionsCatalog: EMOTIONS_CATALOG,
+    maxActiveEmojis: MAX_ACTIVE_EMOJIS,
+  });
 });
 
 // GET /api/matches/:matchId/state - Get match state
@@ -210,7 +229,7 @@ app.post('/api/matches/:matchId/tap', (req, res) => {
   const { emotion, roomKey, period, sliceIndex: clientSliceIndex, minute } = req.body || {};
 
   // Validate emotion
-  const emotionValid = EMOTIONS.find(e => e.key === emotion);
+  const emotionValid = ACTIVE_EMOTIONS.find(e => e.key === emotion);
   if (!emotionValid) {
     return res.status(400).json({ ok: false, error: 'Invalid emotion' });
   }
@@ -529,7 +548,13 @@ app.post('/api/admin/worldcup-rooms', requireAdmin, (req, res) => {
 
 // GET /api/config/emotions - Get emotions config
 app.get('/api/config/emotions', (req, res) => {
-  res.json({ ok: true, emotions: EMOTIONS });
+  res.json({
+    ok: true,
+    emotions: ACTIVE_EMOTIONS,
+    activeEmotions: ACTIVE_EMOTIONS,
+    emotionsCatalog: EMOTIONS_CATALOG,
+    maxActiveEmojis: MAX_ACTIVE_EMOJIS,
+  });
 });
 
 // =============================================================================

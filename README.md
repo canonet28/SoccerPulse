@@ -12,6 +12,10 @@ Real-time emotion tracking for live soccer matches. Express how you feel during 
 - **Export & share** - High-quality image export of your match experience
 - **Fan rooms** - Optional HOME/AWAY rooms for international matches
 
+## Project Notes
+
+For up-to-date architecture, deployment workflow, EAS build notes, and known gotchas, see `KNOWLEDGEBASE.md`.
+
 ## Quick Start
 
 ```bash

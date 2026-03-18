@@ -1742,9 +1742,18 @@
   async function loadMatches() {
     const resp = await API.matches();
     if (resp.ok) {
-      if (resp.emotions && Array.isArray(resp.emotions)) {
+      if (resp.emotionsCatalog && Array.isArray(resp.emotionsCatalog)) {
+        EMO_MAP = new Map(resp.emotionsCatalog.map(e => [e.key, e]));
+      }
+      if (resp.activeEmotions && Array.isArray(resp.activeEmotions)) {
+        EMOTIONS = resp.activeEmotions;
+        renderEmojiPad();
+      } else if (resp.emotions && Array.isArray(resp.emotions)) {
+        // Backward compatibility with older payload shape
         EMOTIONS = resp.emotions;
-        EMO_MAP = new Map(EMOTIONS.map(e => [e.key, e]));
+        if (EMO_MAP.size === 0) {
+          EMO_MAP = new Map(EMOTIONS.map(e => [e.key, e]));
+        }
         renderEmojiPad();
       }
       renderMatchList(resp.matches || []);
