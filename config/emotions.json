@@ -11,7 +11,7 @@
   { "key": "meh", "emoji": "🫤", "label": "Meh", "active": true, "order": 10 },
   { "key": "mindblown", "emoji": "🤯", "label": "Mindblown", "active": true, "order": 11 },
   { "key": "facepalm", "emoji": "🤦🏽‍♂️", "label": "Perplexed", "active": true, "order": 12 },
-  { "key": "thumbsdown", "emoji": "👎", "label": "No", "active": true, "order": 13 }
+  { "key": "thumbsdown", "emoji": "👎", "label": "No", "active": true, "order": 13 },
   { "key": "disappointed", "emoji": "😔", "label": "Disappointed", "active": true, "order": 14 },
   { "key": "frustrated", "emoji": "😤", "label": "Frustrated", "active": true, "order": 15 },
   { "key": "angry", "emoji": "😠", "label": "Angry", "active": true, "order": 16 },
