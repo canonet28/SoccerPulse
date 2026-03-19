@@ -133,7 +133,10 @@ async function deleteArchivedMatchById(matchId) {
   if (!state) {
     return { ok: false, status: 404, error: 'Match not found' };
   }
-  if (!state.archived) {
+  const isFinished = !!state.archived ||
+    state.status === SOCCER_STATUS.ENDED ||
+    state.period === PERIOD.ENDED;
+  if (!isFinished) {
     return { ok: false, status: 400, error: 'Can only delete finished matches' };
   }
 
